@@ -4,12 +4,23 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:turbo": "next dev --turbo",
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "check": "pnpm run type-check && pnpm run lint && pnpm run format:check",
+    "check:all": "pnpm run clean && pnpm run type-check && pnpm run lint && pnpm run format:check && pnpm run build",
+    "clean": "rm -rf .next out node_modules/.cache",
+    "env:check": "node -e \"require('./lib/env')\"",
+    "deps:check": "pnpm outdated",
+    "deps:update": "pnpm update --interactive --latest",
+    "precommit": "lint-staged",
+    "prepush": "pnpm run type-check && pnpm run lint"
   },
   "dependencies": {
     "next": "^15.1.6",

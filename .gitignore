@@ -46,6 +46,8 @@ next-env.d.ts
 *.swo
 *~
 .claude/
+.ai/
+docs/
 
 # OS
 Thumbs.db
