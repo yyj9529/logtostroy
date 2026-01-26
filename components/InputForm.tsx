@@ -108,16 +108,7 @@ export default function InputForm() {
           {/* Raw Log Editor */}
           <div>
             <div className="bg-[#0d1117] rounded-lg overflow-hidden border border-gray-700">
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#161b22] border-b border-gray-700">
-                <div className="flex gap-1">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                </div>
-                <span className="text-sm text-gray-400 ml-2">
-                  VScode.tsx / VSDebug
-                </span>
-              </div>
+
               <textarea
                 name="rawLog"
                 value={formData.rawLog}
@@ -217,17 +208,7 @@ export default function InputForm() {
                     />
                     <span className="text-sm">English</span>
                   </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="outputLanguage"
-                      value="both"
-                      checked={formData.outputLanguage === 'both'}
-                      onChange={handleChange}
-                      className="mr-2"
-                    />
-                    <span className="text-sm">Both</span>
-                  </label>
+
                 </div>
               </div>
 
