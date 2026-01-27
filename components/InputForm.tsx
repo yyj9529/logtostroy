@@ -241,7 +241,17 @@ export default function InputForm() {
                     />
                     <span className="text-sm">English</span>
                   </label>
-
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="outputLanguage"
+                      value="both"
+                      checked={formData.outputLanguage === 'both'}
+                      onChange={handleChange}
+                      className="mr-2"
+                    />
+                    <span className="text-sm">Both</span>
+                  </label>
                 </div>
               </div>
 
