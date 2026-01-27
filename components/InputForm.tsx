@@ -8,6 +8,8 @@ import type {
   OutputLanguage,
 } from '@/lib/types/form'
 import { FIELD_LIMITS } from '@/lib/types/form'
+import OutputDisplay from './OutputDisplay'
+import type { GeneratedOutput, Platform, Language } from '@/lib/types/output'
 
 const initialFormData: LogFormData = {
   rawLog: '',
@@ -23,8 +25,7 @@ export default function InputForm() {
   const [formData, setFormData] = useState<LogFormData>(initialFormData)
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [output, setOutput] = useState<string>('')
-  const [showOutput, setShowOutput] = useState(false)
+  const [output, setOutput] = useState<GeneratedOutput | null>(null)
 
   const validateField = (
     name: keyof LogFormData,
@@ -85,8 +86,24 @@ export default function InputForm() {
     try {
       // TODO: API 호출 구현
       await new Promise((resolve) => setTimeout(resolve, 2000))
-      setOutput('Sample output will appear here...')
-      setShowOutput(true)
+
+      // Generate sample output based on outputLanguage
+      const sampleOutput: GeneratedOutput = {
+        linkedin: {},
+        x: {},
+      }
+
+      if (formData.outputLanguage === 'ko' || formData.outputLanguage === 'both') {
+        sampleOutput.linkedin.ko = `[LinkedIn 한국어 샘플]\n\n${formData.outcome}\n\n${formData.rawLog.substring(0, 200)}...`
+        sampleOutput.x.ko = `[X 한국어 샘플]\n\n${formData.outcome}\n\n${formData.rawLog.substring(0, 100)}...`
+      }
+
+      if (formData.outputLanguage === 'en' || formData.outputLanguage === 'both') {
+        sampleOutput.linkedin.en = `[LinkedIn English Sample]\n\n${formData.outcome}\n\n${formData.rawLog.substring(0, 200)}...`
+        sampleOutput.x.en = `[X English Sample]\n\n${formData.outcome}\n\n${formData.rawLog.substring(0, 100)}...`
+      }
+
+      setOutput(sampleOutput)
     } catch (error) {
       console.error('Error submitting form:', error)
     } finally {
@@ -94,8 +111,24 @@ export default function InputForm() {
     }
   }
 
-  const copyToClipboard = (text: string) => {
+  const handleCopy = (text: string, platform: Platform, language?: Language) => {
     navigator.clipboard.writeText(text)
+  }
+
+  const handleCopyAll = () => {
+    // Already handled in OutputDisplay
+  }
+
+  const handleEdit = (platform: Platform, language: Language, text: string) => {
+    if (!output) return
+
+    setOutput({
+      ...output,
+      [platform]: {
+        ...output[platform],
+        [language]: text,
+      },
+    })
   }
 
   return (
@@ -275,78 +308,14 @@ export default function InputForm() {
       </div>
 
       {/* Right Panel - Output */}
-      <div className="w-1/2 bg-white text-gray-900 overflow-y-auto scrollbar-thin">
-        {/* Output Preview */}
-        <div className="border-b border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Output Preview</h2>
-            <button
-              onClick={() => copyToClipboard(output)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              Copy
-            </button>
-          </div>
-          {isSubmitting && (
-            <div className="flex items-center justify-center py-16">
-              <div className="relative w-24 h-24">
-                <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Output Zone */}
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Output Zone</h2>
-            <button
-              onClick={() => copyToClipboard(output)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              Copy
-            </button>
-          </div>
-
-          {/* Tab */}
-          <div className="mb-4">
-            <button className="px-4 py-2 bg-blue-50 text-blue-600 rounded-t-lg border-b-2 border-blue-600 font-medium text-sm">
-              📄 LinkedIn Preview
-            </button>
-          </div>
-
-          {/* Output Content */}
-          {showOutput ? (
-            <div className="bg-gray-50 rounded-lg p-6 min-h-[400px]">
-              <div className="flex items-start gap-3 mb-4">
-                <div className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center text-white font-bold">
-                  T
-                </div>
-                <div>
-                  <h3 className="font-semibold">
-                    Tramptosted Techniped Technicdc post
-                  </h3>
-                  <p className="text-sm text-gray-500">fasdfsoniew</p>
-                </div>
-              </div>
-              <div className="prose prose-sm max-w-none">
-                <p className="text-gray-700 whitespace-pre-wrap">{output}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 rounded-lg p-12 min-h-[400px] flex items-center justify-center">
-              <p className="text-gray-400 text-center">
-                Generated content will appear here...
-                <br />
-                <span className="text-sm">
-                  Fill in the form and click &quot;Generate Draft&quot;
-                </span>
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      <OutputDisplay
+        output={output}
+        isLoading={isSubmitting}
+        outputLanguage={formData.outputLanguage}
+        onCopy={handleCopy}
+        onCopyAll={handleCopyAll}
+        onEdit={handleEdit}
+      />
     </div>
   )
 }
