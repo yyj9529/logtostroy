@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type {
   OutputDisplayProps,
   Platform,
@@ -22,10 +22,20 @@ export default function OutputDisplay({
     output
   )
 
+
   // Update edited output when output prop changes
-  if (output !== editedOutput && output !== null) {
-    setEditedOutput(output)
-  }
+  useEffect(() => {
+    if (output !== null) {
+      if(outputLanguage === 'en' && output?.linkedin.en){
+        setActiveLanguage('en');
+      }else{
+        setActiveLanguage('ko');
+      }
+
+      setEditedOutput(output)
+      console.log('editedOutput updated:', output)
+    }
+  }, [output])
 
   const handleTextChange = (
     platform: Platform,
