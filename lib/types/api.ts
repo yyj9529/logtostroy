@@ -2,7 +2,7 @@ export interface GenerateRequest {
   rawLog: string
   outcome: string
   tonePreset: 'linkedin' | 'x'
-  outputLanguage: 'ko' | 'en' | 'both'
+  outputLanguage: 'ko' | 'en'
   evidenceBefore?: string
   evidenceAfter?: string
   humanInsight?: string
