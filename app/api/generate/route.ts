@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { FIELD_LIMITS } from '@/lib/types/form'
+import { generateContent } from '@/lib/services/openai'
+import { GenerateRequest } from '@/lib/types/api'
 
 const generateRequestSchema = z.object({
   rawLog: z
@@ -64,18 +66,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const validatedData = validationResult.data
+    const validatedData = validationResult.data as GenerateRequest
 
-    // TODO: Implement actual generation logic with OpenAI
-    // For now, return a placeholder response
+    // Generate content using OpenAI
+    const result = await generateContent(validatedData)
 
-    return NextResponse.json(
-      {
-        message: 'Generation endpoint is ready',
-        data: validatedData,
-      },
-      { status: 200 }
-    )
+    // Log token usage for budget tracking
+    console.log('[Token Usage]', {
+      timestamp: new Date().toISOString(),
+      tokenUsage: result.tokenUsage,
+      tonePreset: validatedData.tonePreset,
+      outputLanguage: validatedData.outputLanguage,
+    })
+
+    return NextResponse.json(result, { status: 200 })
   } catch (error) {
     if (error instanceof SyntaxError) {
       return NextResponse.json(
@@ -87,11 +91,50 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Handle OpenAI API errors
+    if (error instanceof Error) {
+      console.error('Error in generate endpoint:', {
+        message: error.message,
+        stack: error.stack,
+      })
+
+      // Check for specific OpenAI errors
+      if (error.message.includes('timeout')) {
+        return NextResponse.json(
+          {
+            error: 'Request timeout',
+            message: 'The OpenAI API request timed out. Please try again.',
+          },
+          { status: 504 }
+        )
+      }
+
+      if (error.message.includes('rate_limit')) {
+        return NextResponse.json(
+          {
+            error: 'Rate limit exceeded',
+            message: 'OpenAI API rate limit exceeded. Please try again later.',
+          },
+          { status: 429 }
+        )
+      }
+
+      if (error.message.includes('API key')) {
+        return NextResponse.json(
+          {
+            error: 'Configuration error',
+            message: 'OpenAI API key is missing or invalid.',
+          },
+          { status: 500 }
+        )
+      }
+    }
+
     console.error('Error in generate endpoint:', error)
     return NextResponse.json(
       {
         error: 'Internal server error',
-        message: 'An unexpected error occurred',
+        message: 'An unexpected error occurred during content generation.',
       },
       { status: 500 }
     )
