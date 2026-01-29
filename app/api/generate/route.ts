@@ -20,7 +20,7 @@ const generateRequestSchema = z.object({
       `Outcome cannot exceed ${FIELD_LIMITS.outcome} characters`
     ),
   tonePreset: z.enum(['linkedin', 'x']),
-  outputLanguage: z.enum(['ko', 'en', 'both']),
+  outputLanguage: z.enum(['ko', 'en']),
   evidenceBefore: z
     .string()
     .max(
