@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { FIELD_LIMITS } from '@/lib/types/form'
 import { generateContent } from '@/lib/services/openai'
 import { GenerateRequest } from '@/lib/types/api'
+import { checkRateLimit } from '@/lib/middleware/rateLimiter'
 
 const generateRequestSchema = z.object({
   rawLog: z
@@ -46,6 +47,12 @@ const generateRequestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const rateLimitResponse = checkRateLimit(request)
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     const body = await request.json()
 
     // Validate input
