@@ -21,7 +21,7 @@ const generateRequestSchema = z.object({
       `Outcome cannot exceed ${FIELD_LIMITS.outcome} characters`
     ),
   tonePreset: z.enum(['linkedin', 'x']),
-  outputLanguage: z.enum(['ko', 'en']),
+  outputLanguage: z.enum(['ko', 'en', 'both']),
   evidenceBefore: z
     .string()
     .max(
@@ -86,7 +86,22 @@ export async function POST(request: NextRequest) {
       outputLanguage: validatedData.outputLanguage,
     })
 
-    return NextResponse.json(result, { status: 200 })
+    // Transform response to match OutputDisplay expected format
+    const response = {
+      ...result,
+      output: {
+        linkedin: {
+          ko: result.linkedin?.ko,
+          en: result.linkedin?.en,
+        },
+        x: {
+          ko: result.x?.ko,
+          en: result.x?.en,
+        },
+      },
+    }
+
+    return NextResponse.json(response, { status: 200 })
   } catch (error) {
     if (error instanceof SyntaxError) {
       return NextResponse.json(

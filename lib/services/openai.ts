@@ -204,15 +204,11 @@ export async function generateContent(
       warnings.push(...detectToneViolations(content.text))
     }
 
-    // Combine languages if both
-    const finalText =
-      languages.length > 1
-        ? `[한국어]\n${linkedinContent.ko}\n\n[English]\n${linkedinContent.en}`
-        : linkedinContent[languages[0]]
-
     response.linkedin = {
-      text: finalText,
+      text: linkedinContent.ko || linkedinContent.en || '',
       codeBlocks: linkedinCodeBlocks,
+      ko: linkedinContent.ko,
+      en: linkedinContent.en,
     }
   }
 
@@ -243,15 +239,11 @@ export async function generateContent(
       warnings.push(...detectToneViolations(content.text))
     }
 
-    // Combine languages if both
-    const finalText =
-      languages.length > 1
-        ? `[한국어]\n${xContent.ko}\n\n[English]\n${xContent.en}`
-        : xContent[languages[0]]
-
     response.x = {
-      text: finalText,
+      text: xContent.ko || xContent.en || '',
       codeBlocks: xCodeBlocks,
+      ko: xContent.ko,
+      en: xContent.en,
     }
   }
 

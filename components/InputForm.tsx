@@ -84,28 +84,36 @@ export default function InputForm() {
 
     setIsSubmitting(true)
     try {
-      // TODO: API 호출 구현
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rawLog: formData.rawLog,
+          outcome: formData.outcome,
+          tonePreset: formData.tonePreset,
+          outputLanguage: formData.outputLanguage,
+          evidenceBefore: formData.evidenceBefore || undefined,
+          evidenceAfter: formData.evidenceAfter || undefined,
+          humanInsight: formData.humanInsight || undefined,
+        }),
+      })
 
-      // Generate sample output based on outputLanguage
-      const sampleOutput: GeneratedOutput = {
-        linkedin: {},
-        x: {},
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to generate content')
       }
 
-      if (formData.outputLanguage === 'ko' || formData.outputLanguage === 'both') {
-        sampleOutput.linkedin.ko = `[LinkedIn 한국어 샘플]\n\n${formData.outcome}\n\n${formData.rawLog.substring(0, 200)}...`
-        sampleOutput.x.ko = `[X 한국어 샘플]\n\n${formData.outcome}\n\n${formData.rawLog.substring(0, 100)}...`
-      }
-
-      if (formData.outputLanguage === 'en' || formData.outputLanguage === 'both') {
-        sampleOutput.linkedin.en = `[LinkedIn English Sample]\n\n${formData.outcome}\n\n${formData.rawLog.substring(0, 200)}...`
-        sampleOutput.x.en = `[X English Sample]\n\n${formData.outcome}\n\n${formData.rawLog.substring(0, 100)}...`
-      }
-
-      setOutput(sampleOutput)
+      const result = await response.json()
+      setOutput(result.output)
     } catch (error) {
       console.error('Error submitting form:', error)
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'An error occurred while generating content'
+      )
     } finally {
       setIsSubmitting(false)
     }

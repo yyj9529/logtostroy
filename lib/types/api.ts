@@ -2,7 +2,7 @@ export interface GenerateRequest {
   rawLog: string
   outcome: string
   tonePreset: 'linkedin' | 'x'
-  outputLanguage: 'ko' | 'en'
+  outputLanguage: 'ko' | 'en' | 'both'
   evidenceBefore?: string
   evidenceAfter?: string
   humanInsight?: string
@@ -16,6 +16,8 @@ export interface CodeBlock {
 export interface GeneratedContent {
   text: string
   codeBlocks: CodeBlock[]
+  ko?: string
+  en?: string
 }
 
 export interface GenerateResponse {
@@ -26,6 +28,16 @@ export interface GenerateResponse {
     promptTokens: number
     completionTokens: number
     totalTokens: number
+  }
+  output?: {
+    linkedin: {
+      ko?: string
+      en?: string
+    }
+    x: {
+      ko?: string
+      en?: string
+    }
   }
 }
 
