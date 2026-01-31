@@ -7,11 +7,13 @@ import type {
   Language,
   GeneratedOutput,
 } from '@/lib/types/output'
+import AlertBanner from './AlertBanner'
 
 export default function OutputDisplay({
   output,
   isLoading,
   outputLanguage,
+  warnings,
   onCopy,
   onCopyAll,
   onEdit,
@@ -117,6 +119,11 @@ export default function OutputDisplay({
       {/* Output Content */}
       {!isLoading && (
         <div className="flex-1 overflow-y-auto p-6">
+          {/* Tone Violation Warning */}
+          {warnings && warnings.length > 0 && (
+            <AlertBanner warnings={warnings} />
+          )}
+
           {/* Platform Tabs */}
           <div className="flex gap-2 mb-4">
             <button

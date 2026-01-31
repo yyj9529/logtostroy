@@ -22,6 +22,7 @@ export interface OutputDisplayProps {
   output: GeneratedOutput | null
   isLoading: boolean
   outputLanguage: 'ko' | 'en' | 'both'
+  warnings?: string[]
   onCopy: (text: string, platform: Platform, language?: Language) => void
   onCopyAll: () => void
   onEdit: (platform: Platform, language: Language, text: string) => void
