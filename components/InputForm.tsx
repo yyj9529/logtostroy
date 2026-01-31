@@ -26,6 +26,7 @@ export default function InputForm() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [output, setOutput] = useState<GeneratedOutput | null>(null)
+  const [warnings, setWarnings] = useState<string[]>([])
 
   const validateField = (
     name: keyof LogFormData,
@@ -107,6 +108,7 @@ export default function InputForm() {
 
       const result = await response.json()
       setOutput(result.output)
+      setWarnings(result.warnings || [])
     } catch (error) {
       console.error('Error submitting form:', error)
       alert(
@@ -330,6 +332,7 @@ export default function InputForm() {
         output={output}
         isLoading={isSubmitting}
         outputLanguage={formData.outputLanguage}
+        warnings={warnings}
         onCopy={handleCopy}
         onCopyAll={handleCopyAll}
         onEdit={handleEdit}
