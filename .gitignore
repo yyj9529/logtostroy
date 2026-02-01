@@ -49,5 +49,8 @@ next-env.d.ts
 .ai/
 docs/
 
+# Token usage data
+/data/
+
 # OS
 Thumbs.db
