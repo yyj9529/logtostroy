@@ -4,10 +4,8 @@ import { FIELD_LIMITS } from '@/lib/types/form'
 import { generateContent } from '@/lib/services/openai'
 import { GenerateRequest } from '@/lib/types/api'
 import { checkRateLimit } from '@/lib/middleware/rateLimiter'
-import {
-  checkBudgetCeiling,
-  recordTokenUsage,
-} from '@/lib/middleware/budgetGuard'
+import { checkBudget } from '@/lib/middleware/budgetGuard'
+import { recordUsage } from '@/lib/services/budgetTracker'
 
 const generateRequestSchema = z.object({
   rawLog: z
@@ -57,8 +55,8 @@ export async function POST(request: NextRequest) {
       return rateLimitResponse
     }
 
-    // Check monthly budget ceiling before making any LLM request
-    const budgetResponse = checkBudgetCeiling()
+    // Check monthly budget
+    const budgetResponse = checkBudget()
     if (budgetResponse) {
       return budgetResponse
     }
@@ -90,7 +88,11 @@ export async function POST(request: NextRequest) {
 
     // Record token usage for budget tracking
     if (result.tokenUsage) {
-      recordTokenUsage(result.tokenUsage.totalTokens)
+      recordUsage(
+        result.tokenUsage.promptTokens,
+        result.tokenUsage.completionTokens,
+        result.tokenUsage.totalTokens
+      )
     }
 
     console.log('[Token Usage]', {
