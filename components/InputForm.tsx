@@ -1,12 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type {
-  LogFormData,
-  FormErrors,
-  TonePreset,
-  OutputLanguage,
-} from '@/lib/types/form'
+import type { LogFormData, FormErrors } from '@/lib/types/form'
 import { FIELD_LIMITS } from '@/lib/types/form'
 import OutputDisplay from './OutputDisplay'
 import type { GeneratedOutput, Platform, Language } from '@/lib/types/output'
@@ -121,7 +116,7 @@ export default function InputForm() {
     }
   }
 
-  const handleCopy = (text: string, platform: Platform, language?: Language) => {
+  const handleCopy = (text: string, _platform: Platform, _language?: Language) => {
     navigator.clipboard.writeText(text)
   }
 
