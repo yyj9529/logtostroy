@@ -161,9 +161,22 @@ export default function InputForm() {
                 placeholder="Paste your raw logs here..."
               />
             </div>
-            {errors.rawLog && (
-              <p className="text-xs text-red-400 mt-1">{errors.rawLog}</p>
-            )}
+            <div className="flex justify-between items-center mt-1">
+              {errors.rawLog ? (
+                <p className="text-xs text-red-400">{errors.rawLog}</p>
+              ) : (
+                <span />
+              )}
+              <span
+                className={`text-xs ${
+                  formData.rawLog.length > FIELD_LIMITS.rawLog
+                    ? 'text-red-400'
+                    : 'text-gray-500'
+                }`}
+              >
+                {formData.rawLog.length} / {FIELD_LIMITS.rawLog}
+              </span>
+            </div>
           </div>
 
           {/* One Sentence Result */}
@@ -181,9 +194,22 @@ export default function InputForm() {
               }`}
               placeholder="Describe the outcome in one sentence..."
             />
-            {errors.outcome && (
-              <p className="text-xs text-red-400 mt-1">{errors.outcome}</p>
-            )}
+            <div className="flex justify-between items-center mt-1">
+              {errors.outcome ? (
+                <p className="text-xs text-red-400">{errors.outcome}</p>
+              ) : (
+                <span />
+              )}
+              <span
+                className={`text-xs ${
+                  formData.outcome.length > FIELD_LIMITS.outcome
+                    ? 'text-red-400'
+                    : 'text-gray-500'
+                }`}
+              >
+                {formData.outcome.length} / {FIELD_LIMITS.outcome}
+              </span>
+            </div>
           </div>
 
           {/* Additional Options */}
@@ -308,6 +334,17 @@ export default function InputForm() {
                   className="w-full px-3 py-2 bg-[#161b22] border border-gray-700 rounded text-sm text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Your insight..."
                 />
+                <div className="flex justify-end mt-1">
+                  <span
+                    className={`text-xs ${
+                      (formData.humanInsight?.length ?? 0) > FIELD_LIMITS.humanInsight
+                        ? 'text-red-400'
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    {formData.humanInsight?.length ?? 0} / {FIELD_LIMITS.humanInsight}
+                  </span>
+                </div>
               </div>
             </div>
           </details>
