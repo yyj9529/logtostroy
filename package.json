@@ -20,30 +20,33 @@
     "deps:check": "pnpm outdated",
     "deps:update": "pnpm update --interactive --latest",
     "precommit": "lint-staged",
-    "prepush": "pnpm run type-check && pnpm run lint"
+    "prepush": "pnpm run type-check && pnpm run lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "next": "^15.1.6",
+    "openai": "^4.77.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zod": "^3.24.1",
     "shiki": "^1.26.0",
-    "openai": "^4.77.3"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.2",
-    "@eslint/eslintrc": "^3.2.0",
-    "typescript": "^5.7.2",
+    "autoprefixer": "^10.4.20",
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.6",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "postcss": "^8.4.49",
     "prettier": "^3.4.2",
     "tailwindcss": "^3.4.17",
-    "postcss": "^8.4.49",
-    "autoprefixer": "^10.4.20",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.3.0"
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
   },
   "packageManager": "pnpm@9.15.4",
   "lint-staged": {
