@@ -4,8 +4,6 @@ import { useState } from 'react'
 import type {
   LogFormData,
   FormErrors,
-  TonePreset,
-  OutputLanguage,
 } from '@/lib/types/form'
 import { FIELD_LIMITS } from '@/lib/types/form'
 import OutputDisplay from './OutputDisplay'
