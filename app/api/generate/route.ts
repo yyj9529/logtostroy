@@ -4,6 +4,8 @@ import { FIELD_LIMITS } from '@/lib/types/form'
 import { generateContent } from '@/lib/services/openai'
 import { GenerateRequest } from '@/lib/types/api'
 import { checkRateLimit } from '@/lib/middleware/rateLimiter'
+import { checkBudget } from '@/lib/middleware/budgetGuard'
+import { recordUsage } from '@/lib/services/budgetTracker'
 
 const generateRequestSchema = z.object({
   rawLog: z
@@ -53,6 +55,12 @@ export async function POST(request: NextRequest) {
       return rateLimitResponse
     }
 
+    // Check monthly budget
+    const budgetResponse = checkBudget()
+    if (budgetResponse) {
+      return budgetResponse
+    }
+
     const body = await request.json()
 
     // Validate input
@@ -78,7 +86,15 @@ export async function POST(request: NextRequest) {
     // Generate content using OpenAI
     const result = await generateContent(validatedData)
 
-    // Log token usage for budget tracking
+    // Record token usage for budget tracking
+    if (result.tokenUsage) {
+      recordUsage(
+        result.tokenUsage.promptTokens,
+        result.tokenUsage.completionTokens,
+        result.tokenUsage.totalTokens
+      )
+    }
+
     console.log('[Token Usage]', {
       timestamp: new Date().toISOString(),
       tokenUsage: result.tokenUsage,
