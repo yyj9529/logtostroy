@@ -24,6 +24,7 @@ export interface GenerateResponse {
   linkedin?: GeneratedContent
   x?: GeneratedContent
   warnings?: string[]
+  evidenceMissing?: boolean
   tokenUsage?: {
     promptTokens: number
     completionTokens: number
