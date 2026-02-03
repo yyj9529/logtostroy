@@ -5,6 +5,7 @@ import {
   GeneratedContent,
   GenerateResponse,
 } from '@/lib/types/api'
+import { extractCodeBlocks } from '@/lib/services/codeBlockExtractor'
 import {
   BANNED_HYPE_WORDS,
   BANNED_EN_WORDS,
@@ -95,20 +96,6 @@ function buildUserPrompt(
   return parts.join('\n')
 }
 
-function extractCodeBlocks(text: string) {
-  const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g
-  const blocks: { language: string; code: string }[] = []
-  let match
-
-  while ((match = codeBlockRegex.exec(text)) !== null) {
-    blocks.push({
-      language: match[1] || 'plaintext',
-      code: match[2].trim(),
-    })
-  }
-
-  return blocks.slice(0, 3) // Max 3 blocks
-}
 
 function detectToneViolations(text: string): string[] {
   const violations: string[] = []
