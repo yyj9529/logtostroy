@@ -62,6 +62,7 @@ function buildUserPrompt(
   platform: 'linkedin' | 'x'
 ): string {
   const parts: string[] = []
+  const hasEvidence = !!(request.evidenceBefore || request.evidenceAfter)
 
   parts.push(`Raw Log:\n${request.rawLog}`)
   parts.push(`\nOutcome (use exactly as written):\n${request.outcome}`)
@@ -84,6 +85,15 @@ function buildUserPrompt(
       : `\nBased on the above information, write a ${platform === 'linkedin' ? 'LinkedIn' : 'X'} post. Use the outcome verbatim and do not invent results.`
 
   parts.push(instructions)
+
+  // Add evidence warning if no evidence provided
+  if (!hasEvidence) {
+    const noEvidenceWarning =
+      language === 'ko'
+        ? '\n중요: 증거가 제공되지 않았습니다. 숫자 클레임(예: "50% 개선", "3배 향상")을 절대 포함하지 마세요.'
+        : '\nIMPORTANT: No evidence provided. Do NOT include any numeric claims (e.g., "50% improvement", "3x faster").'
+    parts.push(noEvidenceWarning)
+  }
 
   if (platform === 'x') {
     const charLimit =
@@ -148,7 +158,12 @@ export async function generateContent(
   let totalCompletionTokens = 0
   let totalTokens = 0
 
-  const response: GenerateResponse = {}
+  // Check for evidence presence
+  const evidenceMissing = !request.evidenceBefore && !request.evidenceAfter
+
+  const response: GenerateResponse = {
+    evidenceMissing,
+  }
 
   // Determine languages to generate
   const languages: ('ko' | 'en')[] =
@@ -229,13 +244,14 @@ export async function generateContent(
     }
   }
 
-  // Check for evidence warnings
-  if (!request.evidenceBefore && !request.evidenceAfter) {
-    const hasNumericClaims = /\d+%|\d+x|improved by \d+/i.test(
-      response.linkedin?.text || response.x?.text || ''
+  // Check for numeric claims when evidence is missing
+  if (evidenceMissing) {
+    const generatedText = response.linkedin?.text || response.x?.text || ''
+    const hasNumericClaims = /\d+%|\d+배|\d+x|improved by \d+|\d+times/i.test(
+      generatedText
     )
     if (hasNumericClaims) {
-      warnings.push('evidence_missing: numeric claims without evidence')
+      warnings.push('numeric_claims_without_evidence: numeric claims detected but no evidence provided')
     }
   }
 
