@@ -37,7 +37,7 @@ export default function OutputDisplay({
       setEditedOutput(output)
       console.log('editedOutput updated:', output)
     }
-  }, [output])
+  }, [output, outputLanguage])
 
   const handleTextChange = (
     platform: Platform,

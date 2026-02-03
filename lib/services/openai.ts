@@ -6,23 +6,16 @@ import {
   GenerateResponse,
 } from '@/lib/types/api'
 import { extractCodeBlocks } from '@/lib/services/codeBlockExtractor'
+import {
+  BANNED_HYPE_WORDS,
+  BANNED_EN_WORDS,
+  BANNED_KO_WORDS,
+  BANNED_EMOJIS,
+} from '@/lib/constants/bannedWords'
 
 const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
 })
-
-const BANNED_HYPE_WORDS = [
-  'game-changer',
-  'revolutionary',
-  'cutting-edge',
-  'innovative',
-  'disruptive',
-  'next-level',
-  'amazing',
-  'incredible',
-  'awesome',
-  'groundbreaking',
-]
 
 function buildSystemPrompt(language: 'ko' | 'en', platform: 'linkedin' | 'x'): string {
   const baseInstructions = {
@@ -40,7 +33,8 @@ function buildSystemPrompt(language: 'ko' | 'en', platform: 'linkedin' | 'x'): s
 
 ${platform === 'linkedin' ? '5. LinkedIn 포맷: 전문적이지만 접근 가능한 톤. 1-3개의 짧은 문단.' : '5. X 포맷: 간결하고 직접적. 280자 제한 또는 짧은 스레드.'}
 
-금지된 단어: ${BANNED_HYPE_WORDS.join(', ')}`,
+금지된 단어: ${BANNED_KO_WORDS.join(', ')}, ${BANNED_EN_WORDS.join(', ')}
+금지된 이모지: ${BANNED_EMOJIS.join(' ')}`,
     en: `You are a tool that restructures developer technical logs into ${platform === 'linkedin' ? 'LinkedIn' : 'X (Twitter)'} posts.
 
 Core principles:
@@ -55,7 +49,8 @@ Core principles:
 
 ${platform === 'linkedin' ? '5. LinkedIn format: Professional but accessible tone. 1-3 short paragraphs.' : '5. X format: Concise and direct. 280 character limit or short thread.'}
 
-Banned words: ${BANNED_HYPE_WORDS.join(', ')}`,
+Banned words: ${BANNED_EN_WORDS.join(', ')}, ${BANNED_KO_WORDS.join(', ')}
+Banned emojis: ${BANNED_EMOJIS.join(' ')}`,
   }
 
   return baseInstructions[language]
