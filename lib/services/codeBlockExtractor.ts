@@ -1,6 +1,7 @@
 import { CodeBlock } from '@/lib/types/api'
 
 const MAX_CODE_BLOCKS = 3
+const MAX_CODE_BLOCK_LINES = 20
 
 /**
  * Language detection heuristics based on common patterns.
@@ -20,6 +21,21 @@ const LANGUAGE_PATTERNS: { language: string; pattern: RegExp }[] = [
   { language: 'json', pattern: /^\s*[{\[][\s\S]*[}\]]\s*$/ },
   { language: 'yaml', pattern: /^[\w-]+:\s+.+$/m },
 ]
+
+/**
+ * Truncate a code block if it exceeds the maximum line limit.
+ * Preserves syntax validity by cutting at line boundaries.
+ */
+export function truncateCode(code: string): { code: string; truncated: boolean } {
+  const lines = code.split('\n')
+  if (lines.length <= MAX_CODE_BLOCK_LINES) {
+    return { code, truncated: false }
+  }
+  return {
+    code: lines.slice(0, MAX_CODE_BLOCK_LINES).join('\n') + '\n// ... truncated',
+    truncated: true,
+  }
+}
 
 /**
  * Detect the programming language of a code snippet using heuristic pattern matching.
@@ -51,12 +67,14 @@ export function extractCodeBlocks(rawLog: string): CodeBlock[] {
   let match: RegExpExecArray | null
 
   while ((match = fencedRegex.exec(rawLog)) !== null) {
-    const code = match[2].trim()
-    if (code.length === 0) continue
+    const rawCode = match[2].trim()
+    if (rawCode.length === 0) continue
 
+    const { code, truncated } = truncateCode(rawCode)
     blocks.push({
-      language: match[1] || detectLanguage(code),
+      language: match[1] || detectLanguage(rawCode),
       code,
+      truncated,
     })
 
     if (blocks.length >= MAX_CODE_BLOCKS) {
@@ -82,11 +100,13 @@ export function extractCodeBlocks(rawLog: string): CodeBlock[] {
         indentedLines.push('')
       } else {
         if (indentedLines.length >= 2) {
-          const code = indentedLines.join('\n').trim()
-          if (code.length > 0) {
+          const rawCode = indentedLines.join('\n').trim()
+          if (rawCode.length > 0) {
+            const { code, truncated } = truncateCode(rawCode)
             blocks.push({
-              language: detectLanguage(code),
+              language: detectLanguage(rawCode),
               code,
+              truncated,
             })
 
             if (blocks.length >= MAX_CODE_BLOCKS) {
@@ -100,11 +120,13 @@ export function extractCodeBlocks(rawLog: string): CodeBlock[] {
 
     // Handle trailing indented block
     if (indentedLines.length >= 2) {
-      const code = indentedLines.join('\n').trim()
-      if (code.length > 0 && blocks.length < MAX_CODE_BLOCKS) {
+      const rawCode = indentedLines.join('\n').trim()
+      if (rawCode.length > 0 && blocks.length < MAX_CODE_BLOCKS) {
+        const { code, truncated } = truncateCode(rawCode)
         blocks.push({
-          language: detectLanguage(code),
+          language: detectLanguage(rawCode),
           code,
+          truncated,
         })
       }
     }

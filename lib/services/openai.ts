@@ -5,6 +5,7 @@ import {
   GeneratedContent,
   GenerateResponse,
 } from '@/lib/types/api'
+import type { CodeBlock } from '@/lib/types/api'
 import { extractCodeBlocks } from '@/lib/services/codeBlockExtractor'
 import {
   BANNED_HYPE_WORDS,
@@ -191,10 +192,7 @@ export async function generateContent(
       'ko' | 'en',
       string
     >
-    const linkedinCodeBlocks: {
-      language: string
-      code: string
-    }[] = []
+    const linkedinCodeBlocks: CodeBlock[] = []
 
     for (const lang of languages) {
       const { content, usage } = await generateForLanguageAndPlatform(
@@ -229,7 +227,7 @@ export async function generateContent(
       'ko' | 'en',
       string
     >
-    const xCodeBlocks: { language: string; code: string }[] = []
+    const xCodeBlocks: CodeBlock[] = []
 
     for (const lang of languages) {
       const { content, usage } = await generateForLanguageAndPlatform(
