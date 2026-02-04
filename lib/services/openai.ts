@@ -26,7 +26,8 @@ function buildSystemPrompt(language: 'ko' | 'en', platform: 'linkedin' | 'x'): s
 1. 과장하지 않습니다. 마케팅 톤을 사용하지 않습니다.
 2. 이모지를 사용하지 않습니다.
 3. 사용자가 제공한 정보만 사용합니다. 결과를 만들어내지 않습니다.
-4. STAR 프레임워크를 따릅니다:
+4. Trust over polish: 정확성이 우선이며, 증거 없는 주장은 절대 하지 않습니다.
+5. STAR 프레임워크를 따릅니다:
    - Situation (상황): rawLog에서 추출
    - Task (과제): 문맥에서 추론
    - Action (행동): rawLog에서 추출
@@ -46,7 +47,8 @@ Core principles:
 1. No exaggeration. No marketing tone.
 2. No emojis.
 3. Use only user-provided information. Do not invent results.
-4. Follow the STAR framework:
+4. Trust over polish: Accuracy first. NEVER make claims without evidence.
+5. Follow the STAR framework:
    - Situation: extracted from rawLog
    - Task: inferred from context
    - Action: extracted from rawLog
@@ -105,8 +107,8 @@ function buildUserPrompt(
   if (!hasEvidence) {
     const noEvidenceWarning =
       language === 'ko'
-        ? '\n중요: 증거가 제공되지 않았습니다. 숫자 클레임(예: "50% 개선", "3배 향상")을 절대 포함하지 마세요.'
-        : '\nIMPORTANT: No evidence provided. Do NOT include any numeric claims (e.g., "50% improvement", "3x faster").'
+        ? '\n중요: 증거가 제공되지 않았습니다. 다음을 절대 포함하지 마세요:\n- 숫자 클레임 (예: "50% 개선", "3배 향상", "2배 빨라짐")\n- 성능 주장 (예: "significantly faster", "much better", "dramatically improved")\n- 정량적 비교 (예: "훨씬 빠른", "월등히 나은", "크게 개선된")\n증거 없이는 정성적 설명만 사용하세요.'
+        : '\nIMPORTANT: No evidence provided. Do NOT include:\n- Any numeric claims (e.g., "50% improvement", "3x faster", "2x better")\n- Performance claims (e.g., "significantly faster", "much better", "dramatically improved")\n- Quantitative comparisons (e.g., "way faster", "far better", "greatly enhanced")\nWithout evidence, use only qualitative descriptions.'
     parts.push(noEvidenceWarning)
   }
 
@@ -259,11 +261,22 @@ export async function generateContent(
   // Check for numeric claims when evidence is missing
   if (evidenceMissing) {
     const generatedText = response.linkedin?.text || response.x?.text || ''
-    const hasNumericClaims = /\d+%|\d+배|\d+x|improved by \d+|\d+times/i.test(
-      generatedText
-    )
+
+    // Numeric patterns: percentages, multipliers, numeric improvements
+    const numericPatterns = /\d+%|\d+배|\d+x|\d+×|improved by \d+|\d+times|\d+\s*times|by\s+\d+%|by\s+\d+x|\d+\s*fold/i
+
+    // Performance claim patterns
+    const performancePatterns = /significantly (faster|better|improved)|much (faster|better|improved)|dramatically (faster|better|improved)|way (faster|better)|far (better|faster)|greatly (enhanced|improved)|훨씬\s+(빠른|나은|좋은)|월등히\s+(나은|빠른)|크게\s+(개선|향상)/i
+
+    const hasNumericClaims = numericPatterns.test(generatedText)
+    const hasPerformanceClaims = performancePatterns.test(generatedText)
+
     if (hasNumericClaims) {
       warnings.push('numeric_claims_without_evidence: numeric claims detected but no evidence provided')
+    }
+
+    if (hasPerformanceClaims) {
+      warnings.push('performance_claims_without_evidence: performance claims detected but no evidence provided')
     }
   }
 
