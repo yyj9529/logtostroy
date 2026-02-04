@@ -11,6 +11,7 @@ export interface GenerateRequest {
 export interface CodeBlock {
   language: string
   code: string
+  truncated: boolean
 }
 
 export interface GeneratedContent {

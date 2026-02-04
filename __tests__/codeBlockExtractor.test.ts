@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   extractCodeBlocks,
   detectLanguage,
+  truncateCode,
 } from '@/lib/services/codeBlockExtractor'
 
 describe('detectLanguage', () => {
@@ -55,6 +56,7 @@ Some text after
     expect(result[0]).toEqual({
       language: 'typescript',
       code: 'const x: number = 42',
+      truncated: false,
     })
   })
 
@@ -177,5 +179,72 @@ End.
 
   it('handles empty string', () => {
     expect(extractCodeBlocks('')).toEqual([])
+  })
+
+  it('truncates a long fenced code block and sets truncated flag', () => {
+    const longCode = Array.from({ length: 30 }, (_, i) => `const line${i} = ${i}`).join('\n')
+    const rawLog = `\`\`\`javascript\n${longCode}\n\`\`\``
+    const result = extractCodeBlocks(rawLog)
+    expect(result).toHaveLength(1)
+    expect(result[0].truncated).toBe(true)
+    expect(result[0].code).toContain('// ... truncated')
+    expect(result[0].code.split('\n')).toHaveLength(21) // 20 lines + truncation marker
+  })
+
+  it('does not truncate a short fenced code block', () => {
+    const shortCode = Array.from({ length: 5 }, (_, i) => `const line${i} = ${i}`).join('\n')
+    const rawLog = `\`\`\`javascript\n${shortCode}\n\`\`\``
+    const result = extractCodeBlocks(rawLog)
+    expect(result).toHaveLength(1)
+    expect(result[0].truncated).toBe(false)
+    expect(result[0].code).not.toContain('// ... truncated')
+  })
+
+  it('truncates a long indented code block', () => {
+    const longCode = Array.from({ length: 25 }, (_, i) => `    const line${i} = ${i}`).join('\n')
+    const rawLog = `Some text:\n${longCode}\nEnd.`
+    const result = extractCodeBlocks(rawLog)
+    expect(result).toHaveLength(1)
+    expect(result[0].truncated).toBe(true)
+    expect(result[0].code).toContain('// ... truncated')
+  })
+
+  it('preserves language detection on truncated blocks', () => {
+    const lines = ['def hello():', '    print("hello")']
+    const padding = Array.from({ length: 25 }, (_, i) => `    x${i} = ${i}`)
+    const longCode = [...lines, ...padding].join('\n')
+    const rawLog = `\`\`\`\n${longCode}\n\`\`\``
+    const result = extractCodeBlocks(rawLog)
+    expect(result[0].language).toBe('python')
+    expect(result[0].truncated).toBe(true)
+  })
+})
+
+describe('truncateCode', () => {
+  it('returns unchanged code when within limit', () => {
+    const code = 'line1\nline2\nline3'
+    const result = truncateCode(code)
+    expect(result.code).toBe(code)
+    expect(result.truncated).toBe(false)
+  })
+
+  it('truncates code exceeding 20 lines', () => {
+    const code = Array.from({ length: 30 }, (_, i) => `line ${i}`).join('\n')
+    const result = truncateCode(code)
+    expect(result.truncated).toBe(true)
+    expect(result.code).toContain('// ... truncated')
+    // 20 original lines + marker line
+    const lines = result.code.split('\n')
+    expect(lines).toHaveLength(21)
+    expect(lines[0]).toBe('line 0')
+    expect(lines[19]).toBe('line 19')
+    expect(lines[20]).toBe('// ... truncated')
+  })
+
+  it('keeps exactly 20 lines without truncation', () => {
+    const code = Array.from({ length: 20 }, (_, i) => `line ${i}`).join('\n')
+    const result = truncateCode(code)
+    expect(result.truncated).toBe(false)
+    expect(result.code).toBe(code)
   })
 })
