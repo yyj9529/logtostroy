@@ -6,6 +6,7 @@ import {
   GenerateResponse,
 } from '@/lib/types/api'
 import { extractCodeBlocks } from '@/lib/services/codeBlockExtractor'
+import { highlightCodeBlocks } from '@/lib/services/codeHighlighter'
 import {
   BANNED_HYPE_WORDS,
   BANNED_EN_WORDS,
@@ -143,10 +144,14 @@ async function generateForLanguageAndPlatform(
   const generatedText = completion.choices[0]?.message?.content || ''
   const codeBlocks = extractCodeBlocks(request.rawLog)
 
+  // Highlight code blocks using Shiki (server-side)
+  const highlightedCodeBlocks = await highlightCodeBlocks(codeBlocks)
+
   return {
     content: {
       text: generatedText,
       codeBlocks,
+      highlightedCodeBlocks,
     },
     usage: completion.usage!,
   }
