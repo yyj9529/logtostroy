@@ -188,6 +188,7 @@ export async function generateContent(
       language: string
       code: string
     }[] = []
+    let linkedinHighlightedCodeBlocks: any[] = []
 
     for (const lang of languages) {
       const { content, usage } = await generateForLanguageAndPlatform(
@@ -198,6 +199,7 @@ export async function generateContent(
       linkedinContent[lang] = content.text
       if (lang === languages[0]) {
         linkedinCodeBlocks.push(...content.codeBlocks)
+        linkedinHighlightedCodeBlocks = content.highlightedCodeBlocks || []
       }
 
       totalPromptTokens += usage.prompt_tokens
@@ -211,6 +213,7 @@ export async function generateContent(
     response.linkedin = {
       text: linkedinContent.ko || linkedinContent.en || '',
       codeBlocks: linkedinCodeBlocks,
+      highlightedCodeBlocks: linkedinHighlightedCodeBlocks,
       ko: linkedinContent.ko,
       en: linkedinContent.en,
     }
@@ -223,6 +226,7 @@ export async function generateContent(
       string
     >
     const xCodeBlocks: { language: string; code: string }[] = []
+    let xHighlightedCodeBlocks: any[] = []
 
     for (const lang of languages) {
       const { content, usage } = await generateForLanguageAndPlatform(
@@ -233,6 +237,7 @@ export async function generateContent(
       xContent[lang] = content.text
       if (lang === languages[0]) {
         xCodeBlocks.push(...content.codeBlocks)
+        xHighlightedCodeBlocks = content.highlightedCodeBlocks || []
       }
 
       totalPromptTokens += usage.prompt_tokens
@@ -246,6 +251,7 @@ export async function generateContent(
     response.x = {
       text: xContent.ko || xContent.en || '',
       codeBlocks: xCodeBlocks,
+      highlightedCodeBlocks: xHighlightedCodeBlocks,
       ko: xContent.ko,
       en: xContent.en,
     }
