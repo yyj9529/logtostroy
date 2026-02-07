@@ -5,6 +5,7 @@ import {
   GeneratedContent,
   GenerateResponse,
 } from '@/lib/types/api'
+import type { CodeBlock, HighlightedCodeBlock } from '@/lib/types/api'
 import { extractCodeBlocks } from '@/lib/services/codeBlockExtractor'
 import { highlightCodeBlocks } from '@/lib/services/codeHighlighter'
 import {
@@ -32,8 +33,12 @@ function buildSystemPrompt(language: 'ko' | 'en', platform: 'linkedin' | 'x'): s
    - Task (과제): 문맥에서 추론
    - Action (행동): rawLog에서 추출
    - Result (결과): 사용자가 제공한 outcome을 그대로 사용
+5. 증거(Evidence) 처리 규칙:
+   - 증거가 제공되면 반드시 원문 그대로 인용합니다. 의역하거나 수정하지 않습니다.
+   - 증거는 "[Evidence]"로 명확히 표시합니다.
+   - 증거의 숫자, 단위, 표현을 정확히 보존합니다.
 
-${platform === 'linkedin' ? '5. LinkedIn 포맷: 전문적이지만 접근 가능한 톤. 1-3개의 짧은 문단.' : '5. X 포맷: 간결하고 직접적. 280자 제한 또는 짧은 스레드.'}
+${platform === 'linkedin' ? '6. LinkedIn 포맷: 전문적이지만 접근 가능한 톤. 1-3개의 짧은 문단.' : '6. X 포맷: 간결하고 직접적. 280자 제한 또는 짧은 스레드.'}
 
 금지된 단어: ${BANNED_KO_WORDS.join(', ')}, ${BANNED_EN_WORDS.join(', ')}
 금지된 이모지: ${BANNED_EMOJIS.join(' ')}`,
@@ -49,8 +54,12 @@ Core principles:
    - Task: inferred from context
    - Action: extracted from rawLog
    - Result: use the user-provided outcome verbatim
+5. Evidence handling rules:
+   - When evidence is provided, quote it EXACTLY as given. Do NOT paraphrase or modify.
+   - Clearly mark evidence with "[Evidence]" label.
+   - Preserve all numbers, units, and phrasing from the evidence verbatim.
 
-${platform === 'linkedin' ? '5. LinkedIn format: Professional but accessible tone. 1-3 short paragraphs.' : '5. X format: Concise and direct. 280 character limit or short thread.'}
+${platform === 'linkedin' ? '6. LinkedIn format: Professional but accessible tone. 1-3 short paragraphs.' : '6. X format: Concise and direct. 280 character limit or short thread.'}
 
 Banned words: ${BANNED_EN_WORDS.join(', ')}, ${BANNED_KO_WORDS.join(', ')}
 Banned emojis: ${BANNED_EMOJIS.join(' ')}`,
@@ -71,21 +80,27 @@ function buildUserPrompt(
   parts.push(`\nOutcome (use exactly as written):\n${request.outcome}`)
 
   if (request.evidenceBefore) {
-    parts.push(`\nEvidence Before:\n${request.evidenceBefore}`)
+    parts.push(`\nEvidence Before (quote verbatim — do NOT paraphrase):\n${request.evidenceBefore}`)
   }
 
   if (request.evidenceAfter) {
-    parts.push(`\nEvidence After:\n${request.evidenceAfter}`)
+    parts.push(`\nEvidence After (quote verbatim — do NOT paraphrase):\n${request.evidenceAfter}`)
   }
 
   if (request.humanInsight) {
     parts.push(`\nHuman Insight:\n${request.humanInsight}`)
   }
 
+  const evidenceInstruction = hasEvidence
+    ? language === 'ko'
+      ? ' 제공된 증거(Evidence)는 원문 그대로 "[Evidence]" 라벨과 함께 인용하세요. 의역하거나 수정하지 마세요.'
+      : ' Quote any provided evidence EXACTLY as given, marked with "[Evidence]". Do NOT paraphrase or modify the evidence text.'
+    : ''
+
   const instructions =
     language === 'ko'
-      ? `\n위 정보를 바탕으로 ${platform === 'linkedin' ? 'LinkedIn' : 'X'} 포스트를 작성하세요. outcome을 그대로 사용하고, 결과를 만들어내지 마세요.`
-      : `\nBased on the above information, write a ${platform === 'linkedin' ? 'LinkedIn' : 'X'} post. Use the outcome verbatim and do not invent results.`
+      ? `\n위 정보를 바탕으로 ${platform === 'linkedin' ? 'LinkedIn' : 'X'} 포스트를 작성하세요. outcome을 그대로 사용하고, 결과를 만들어내지 마세요.${evidenceInstruction}`
+      : `\nBased on the above information, write a ${platform === 'linkedin' ? 'LinkedIn' : 'X'} post. Use the outcome verbatim and do not invent results.${evidenceInstruction}`
 
   parts.push(instructions)
 
@@ -184,11 +199,8 @@ export async function generateContent(
       'ko' | 'en',
       string
     >
-    const linkedinCodeBlocks: {
-      language: string
-      code: string
-    }[] = []
-    let linkedinHighlightedCodeBlocks: any[] = []
+    const linkedinCodeBlocks: CodeBlock[] = []
+    let linkedinHighlightedCodeBlocks: HighlightedCodeBlock[] = []
 
     for (const lang of languages) {
       const { content, usage } = await generateForLanguageAndPlatform(
@@ -225,8 +237,8 @@ export async function generateContent(
       'ko' | 'en',
       string
     >
-    const xCodeBlocks: { language: string; code: string }[] = []
-    let xHighlightedCodeBlocks: any[] = []
+    const xCodeBlocks: CodeBlock[] = []
+    let xHighlightedCodeBlocks: HighlightedCodeBlock[] = []
 
     for (const lang of languages) {
       const { content, usage } = await generateForLanguageAndPlatform(
@@ -276,6 +288,25 @@ export async function generateContent(
 
     if (hasPerformanceClaims) {
       warnings.push('performance_claims_without_evidence: performance claims detected but no evidence provided')
+    }
+  }
+
+  // Check that evidence is quoted verbatim when provided
+  if (!evidenceMissing) {
+    const generatedTexts = [
+      response.linkedin?.ko,
+      response.linkedin?.en,
+      response.x?.ko,
+      response.x?.en,
+    ].filter(Boolean) as string[]
+
+    for (const text of generatedTexts) {
+      if (request.evidenceBefore && !text.includes(request.evidenceBefore)) {
+        warnings.push('evidence_not_verbatim: evidenceBefore may not be quoted exactly as provided')
+      }
+      if (request.evidenceAfter && !text.includes(request.evidenceAfter)) {
+        warnings.push('evidence_not_verbatim: evidenceAfter may not be quoted exactly as provided')
+      }
     }
   }
 
