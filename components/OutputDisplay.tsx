@@ -8,6 +8,7 @@ import type {
   GeneratedOutput,
 } from '@/lib/types/output'
 import AlertBanner from './AlertBanner'
+import CodeBlockCard from './CodeBlockCard'
 
 export default function OutputDisplay({
   output,
@@ -15,6 +16,7 @@ export default function OutputDisplay({
   outputLanguage,
   warnings,
   evidenceMissing,
+  highlightedCodeBlocks,
   onCopy,
   onCopyAll,
   onEdit,
@@ -251,6 +253,11 @@ export default function OutputDisplay({
                   placeholder="Generated content will appear here..."
                 />
               </div>
+
+              {/* Code Blocks Section */}
+              {highlightedCodeBlocks && highlightedCodeBlocks.length > 0 && (
+                <CodeBlockCard codeBlocks={highlightedCodeBlocks} />
+              )}
 
               {/* Individual Copy Button */}
               <button
