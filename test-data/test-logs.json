@@ -1,0 +1,331 @@
+{
+  "testLogs": [
+    {
+      "id": "basic-01",
+      "name": "Simple Bug Fix - Korean",
+      "category": "basic",
+      "input": {
+        "rawLog": "오늘 회원가입 버그를 수정했다. 이메일 validation이 제대로 작동하지 않아서 일부 사용자가 가입할 수 없었다. regex 패턴을 수정하고 테스트 케이스를 추가했다.",
+        "outcome": "회원가입 버그 수정으로 모든 사용자 가입 가능",
+        "tonePreset": "linkedin",
+        "outputLanguage": "ko",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Evidence missing info message (blue)",
+        "No numeric claims",
+        "Korean output"
+      ]
+    },
+    {
+      "id": "basic-02",
+      "name": "Performance Improvement with Evidence",
+      "category": "basic",
+      "input": {
+        "rawLog": "API response time optimization. Added Redis caching layer and optimized database queries. Removed N+1 query problems and added proper indexes.",
+        "outcome": "API performance improved significantly",
+        "tonePreset": "linkedin",
+        "outputLanguage": "en",
+        "evidenceBefore": "Average response time: 2.5s, Throughput: 100 req/s",
+        "evidenceAfter": "Average response time: 0.3s, Throughput: 850 req/s",
+        "humanInsight": "Redis caching had the biggest impact on performance"
+      },
+      "expectedBehavior": [
+        "No evidence missing warning",
+        "Evidence quoted verbatim",
+        "Performance metrics included"
+      ]
+    },
+    {
+      "id": "basic-03",
+      "name": "Both Languages - BOTH mode",
+      "category": "basic",
+      "input": {
+        "rawLog": "데이터베이스 마이그레이션 작업을 완료했다. PostgreSQL 12에서 15로 업그레이드하고 성능 튜닝을 수행했다.",
+        "outcome": "데이터베이스 업그레이드 및 성능 개선",
+        "tonePreset": "linkedin",
+        "outputLanguage": "both",
+        "evidenceBefore": "쿼리 성능: 평균 500ms",
+        "evidenceAfter": "쿼리 성능: 평균 150ms",
+        "humanInsight": "인덱스 재구성이 가장 큰 효과를 냄"
+      },
+      "expectedBehavior": [
+        "Korean and English outputs",
+        "Language tabs visible",
+        "Evidence in both languages"
+      ]
+    },
+    {
+      "id": "code-01",
+      "name": "Single Code Block",
+      "category": "codeblock",
+      "input": {
+        "rawLog": "Added a utility function for date formatting\n\n```javascript\nfunction formatDate(date) {\n  return new Intl.DateTimeFormat('ko-KR', {\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit'\n  }).format(date);\n}\n```\n\nNow all dates are consistently formatted across the application.",
+        "outcome": "Implemented consistent date formatting",
+        "tonePreset": "linkedin",
+        "outputLanguage": "en",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Code block rendered with Shiki",
+        "JavaScript syntax highlighting",
+        "Code card displayed"
+      ]
+    },
+    {
+      "id": "code-02",
+      "name": "Multiple Code Blocks (3 max)",
+      "category": "codeblock",
+      "input": {
+        "rawLog": "Refactored authentication flow\n\nOld approach:\n```javascript\napp.post('/login', (req, res) => {\n  const user = db.findUser(req.body.email);\n  if (bcrypt.compare(req.body.password, user.hash)) {\n    res.json({ token: generateToken(user) });\n  }\n});\n```\n\nNew approach:\n```javascript\napp.post('/login', async (req, res) => {\n  const user = await authService.authenticate(\n    req.body.email,\n    req.body.password\n  );\n  res.json({ token: user.token });\n});\n```\n\nTests added:\n```javascript\ntest('POST /login authenticates valid user', async () => {\n  const res = await request(app)\n    .post('/login')\n    .send({ email: 'test@example.com', password: 'password' });\n  expect(res.status).toBe(200);\n  expect(res.body.token).toBeDefined();\n});\n```\n\nThis fourth block should be ignored:\n```javascript\nconst ignored = 'this should not appear';\n```",
+        "outcome": "Authentication refactored with better security",
+        "tonePreset": "linkedin",
+        "outputLanguage": "en",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": "Moving to service layer improved testability"
+      },
+      "expectedBehavior": [
+        "Exactly 3 code blocks rendered",
+        "Fourth block ignored",
+        "All blocks syntax highlighted"
+      ]
+    },
+    {
+      "id": "tone-01",
+      "name": "Heavy Hype Language",
+      "category": "tone-violation",
+      "input": {
+        "rawLog": "This revolutionary breakthrough represents a game-changing paradigm shift in our industry. Our cutting-edge AI solution leverages state-of-the-art machine learning to deliver unprecedented, world-class results that dramatically transform business outcomes. This is truly a best-in-class innovation that will completely disrupt the market.",
+        "outcome": "Launched new AI-powered feature",
+        "tonePreset": "linkedin",
+        "outputLanguage": "en",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Tone violation warning (yellow)",
+        "List of hype words detected",
+        "Neutralized output"
+      ]
+    },
+    {
+      "id": "tone-02",
+      "name": "Some Hype Words",
+      "category": "tone-violation",
+      "input": {
+        "rawLog": "We implemented an amazing new feature that provides incredible value. This breakthrough solution will revolutionize how users interact with our platform.",
+        "outcome": "Improved user interaction",
+        "tonePreset": "linkedin",
+        "outputLanguage": "en",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Tone violation warning",
+        "Detected: amazing, incredible, breakthrough, revolutionize",
+        "Professional tone in output"
+      ]
+    },
+    {
+      "id": "evidence-01",
+      "name": "Complete Evidence",
+      "category": "evidence",
+      "input": {
+        "rawLog": "최적화 작업으로 서버 비용을 크게 절감했다. 불필요한 API 호출을 제거하고 캐싱을 개선했다.",
+        "outcome": "서버 비용 50% 절감",
+        "tonePreset": "linkedin",
+        "outputLanguage": "ko",
+        "evidenceBefore": "월 서버 비용: $5,000, CPU 사용률: 80%",
+        "evidenceAfter": "월 서버 비용: $2,500, CPU 사용률: 40%",
+        "humanInsight": "캐싱 전략이 핵심이었음"
+      },
+      "expectedBehavior": [
+        "No evidence warning",
+        "Exact metrics quoted",
+        "Before/after comparison clear"
+      ]
+    },
+    {
+      "id": "evidence-02",
+      "name": "No Evidence - Should Suppress Claims",
+      "category": "evidence",
+      "input": {
+        "rawLog": "UI를 대폭 개선했다. 버튼 크기를 키우고, 색상을 변경하고, 폰트를 조정했다. 사용자 피드백이 아주 좋다.",
+        "outcome": "UI/UX 개선으로 사용성 10배 향상",
+        "tonePreset": "linkedin",
+        "outputLanguage": "ko",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Evidence missing warning (blue)",
+        "No '10배' or specific numbers in output",
+        "Qualitative improvements only"
+      ]
+    },
+    {
+      "id": "edge-01",
+      "name": "Very Short Input",
+      "category": "edge",
+      "input": {
+        "rawLog": "Fixed bug",
+        "outcome": "Done",
+        "tonePreset": "linkedin",
+        "outputLanguage": "en",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Still generates meaningful output",
+        "Maintains STAR structure attempt",
+        "Minimum content length"
+      ]
+    },
+    {
+      "id": "edge-02",
+      "name": "Special Characters & Emojis",
+      "category": "edge",
+      "input": {
+        "rawLog": "🚀 Deployed new feature! Special chars: <script>alert('xss')</script> & \"quotes\" & 'apostrophes' 테스트 완료 ✅",
+        "outcome": "Feature 🎉 deployed successfully",
+        "tonePreset": "linkedin",
+        "outputLanguage": "ko",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Emojis handled consistently",
+        "Special chars escaped",
+        "No XSS vulnerability"
+      ]
+    },
+    {
+      "id": "edge-03",
+      "name": "Mixed Korean-English Input",
+      "category": "edge",
+      "input": {
+        "rawLog": "버그 수정 completed successfully. Fixed the critical authentication issue in login flow. 이제 모든 사용자가 정상적으로 로그인할 수 있다.",
+        "outcome": "Authentication bug fixed",
+        "tonePreset": "linkedin",
+        "outputLanguage": "en",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "English output (per outputLanguage)",
+        "Korean input translated/understood",
+        "Consistent output language"
+      ]
+    },
+    {
+      "id": "x-platform-01",
+      "name": "X Platform - Short Form",
+      "category": "platform",
+      "input": {
+        "rawLog": "Spent the day optimizing our database queries. Removed N+1 problems, added indexes, and implemented query result caching. The difference is night and day.",
+        "outcome": "Database performance dramatically improved",
+        "tonePreset": "x",
+        "outputLanguage": "en",
+        "evidenceBefore": "Query time: 2.5s avg",
+        "evidenceAfter": "Query time: 0.2s avg",
+        "humanInsight": "Indexes made the biggest difference"
+      },
+      "expectedBehavior": [
+        "Shorter output (X style)",
+        "More casual/direct tone",
+        "Evidence still included",
+        "Under 280 chars ideally"
+      ]
+    },
+    {
+      "id": "validation-01",
+      "name": "Empty Required Field",
+      "category": "validation",
+      "input": {
+        "rawLog": "Some work done today",
+        "outcome": "",
+        "tonePreset": "linkedin",
+        "outputLanguage": "ko",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Validation error (red)",
+        "Message: 'One Sentence Result is required'",
+        "Submit blocked"
+      ]
+    },
+    {
+      "id": "validation-02",
+      "name": "Max Length Exceeded",
+      "category": "validation",
+      "input": {
+        "rawLog": "a".repeat(2001),
+        "outcome": "Test",
+        "tonePreset": "linkedin",
+        "outputLanguage": "ko",
+        "evidenceBefore": "",
+        "evidenceAfter": "",
+        "humanInsight": ""
+      },
+      "expectedBehavior": [
+        "Error message shown",
+        "Character counter red",
+        "Max 2000 characters (current: 2001)",
+        "Submit fails"
+      ]
+    },
+    {
+      "id": "realistic-01",
+      "name": "Realistic Backend Development",
+      "category": "realistic",
+      "input": {
+        "rawLog": "Implemented new user notification system. Added email and in-app notifications using SendGrid API and WebSocket connections. Created notification preferences UI where users can configure what they want to be notified about.\n\n```typescript\ninterface NotificationPreference {\n  email: boolean;\n  inApp: boolean;\n  types: ('mention' | 'reply' | 'like')[];\n}\n\nasync function sendNotification(\n  userId: string,\n  type: NotificationType,\n  content: string\n) {\n  const prefs = await getPreferences(userId);\n  \n  if (prefs.email && prefs.types.includes(type)) {\n    await emailService.send(userId, content);\n  }\n  \n  if (prefs.inApp) {\n    await wsService.notify(userId, { type, content });\n  }\n}\n```",
+        "outcome": "Notification system with user preferences implemented",
+        "tonePreset": "linkedin",
+        "outputLanguage": "en",
+        "evidenceBefore": "No notification system",
+        "evidenceAfter": "Real-time notifications with 95% delivery rate",
+        "humanInsight": "WebSocket integration was trickier than expected but improved UX significantly"
+      },
+      "expectedBehavior": [
+        "Code block with TypeScript highlighting",
+        "Evidence quoted",
+        "Professional tone",
+        "STAR structure"
+      ]
+    },
+    {
+      "id": "realistic-02",
+      "name": "Realistic Frontend Bug Fix",
+      "category": "realistic",
+      "input": {
+        "rawLog": "사용자 프로필 페이지에서 발생하던 메모리 누수를 수정했다. useEffect cleanup이 제대로 되지 않아서 컴포넌트 unmount 후에도 이벤트 리스너가 남아있었다. React DevTools Profiler로 문제를 찾아내고 cleanup 함수를 추가했다. 추가로 useMemo를 활용해 불필요한 재렌더링도 방지했다.",
+        "outcome": "메모리 누수 해결 및 성능 개선",
+        "tonePreset": "linkedin",
+        "outputLanguage": "ko",
+        "evidenceBefore": "메모리 사용량: 페이지 방문마다 50MB 증가",
+        "evidenceAfter": "메모리 사용량: 안정적 유지 (증가 없음)",
+        "humanInsight": "React DevTools Profiler가 문제 진단에 매우 유용했음"
+      },
+      "expectedBehavior": [
+        "Korean output",
+        "Evidence in Korean",
+        "Technical details preserved",
+        "Professional tone"
+      ]
+    }
+  ]
+}
