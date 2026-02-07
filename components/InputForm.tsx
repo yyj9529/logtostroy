@@ -6,8 +6,10 @@ import { FIELD_LIMITS } from '@/lib/types/form'
 import OutputDisplay from './OutputDisplay'
 import Toast, { type ToastType } from './Toast'
 import type { GeneratedOutput, Platform, Language } from '@/lib/types/output'
+import type { FeedbackMessage } from '@/lib/types/feedback'
 import { copyToClipboard } from '@/lib/utils/clipboard'
 import type { HighlightedCodeBlock } from '@/lib/types/api'
+import { parseApiError } from '@/lib/utils/feedbackHelpers'
 
 const initialFormData: LogFormData = {
   rawLog: '',
@@ -26,6 +28,7 @@ export default function InputForm() {
   const [output, setOutput] = useState<GeneratedOutput | null>(null)
   const [warnings, setWarnings] = useState<string[]>([])
   const [evidenceMissing, setEvidenceMissing] = useState(false)
+  const [feedbackMessages, setFeedbackMessages] = useState<FeedbackMessage[]>([])
   const [highlightedCodeBlocks, setHighlightedCodeBlocks] = useState<HighlightedCodeBlock[]>([])
   const [toast, setToast] = useState<{
     message: string
@@ -88,6 +91,7 @@ export default function InputForm() {
     }
 
     setIsSubmitting(true)
+    setFeedbackMessages([]) // Clear previous error messages
     try {
       const response = await fetch('/api/generate', {
         method: 'POST',
@@ -107,7 +111,11 @@ export default function InputForm() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to generate content')
+        // Convert API error to feedback message
+        const errorMessage = parseApiError(errorData)
+        setFeedbackMessages([errorMessage])
+        setOutput(null) // Clear output on error
+        return
       }
 
       const result = await response.json()
@@ -117,11 +125,15 @@ export default function InputForm() {
       setHighlightedCodeBlocks(result.highlightedCodeBlocks || [])
     } catch (error) {
       console.error('Error submitting form:', error)
-      alert(
-        error instanceof Error
-          ? error.message
-          : 'An error occurred while generating content'
-      )
+      // Convert exception to feedback message
+      const errorMessage = parseApiError({
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An error occurred while generating content',
+      })
+      setFeedbackMessages([errorMessage])
+      setOutput(null) // Clear output on error
     } finally {
       setIsSubmitting(false)
     }
@@ -428,6 +440,7 @@ export default function InputForm() {
         outputLanguage={formData.outputLanguage}
         warnings={warnings}
         evidenceMissing={evidenceMissing}
+        feedbackMessages={feedbackMessages}
         highlightedCodeBlocks={highlightedCodeBlocks}
         onCopy={handleCopy}
         onCopyAll={handleCopyAll}
