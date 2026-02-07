@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
           en: result.x?.en,
         },
       },
+      highlightedCodeBlocks: result.linkedin?.highlightedCodeBlocks || result.x?.highlightedCodeBlocks || [],
     }
 
     return NextResponse.json(response, { status: 200 })

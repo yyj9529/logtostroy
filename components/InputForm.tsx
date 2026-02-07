@@ -5,6 +5,7 @@ import type { LogFormData, FormErrors } from '@/lib/types/form'
 import { FIELD_LIMITS } from '@/lib/types/form'
 import OutputDisplay from './OutputDisplay'
 import type { GeneratedOutput, Platform, Language } from '@/lib/types/output'
+import type { HighlightedCodeBlock } from '@/lib/types/api'
 
 const initialFormData: LogFormData = {
   rawLog: '',
@@ -23,6 +24,7 @@ export default function InputForm() {
   const [output, setOutput] = useState<GeneratedOutput | null>(null)
   const [warnings, setWarnings] = useState<string[]>([])
   const [evidenceMissing, setEvidenceMissing] = useState(false)
+  const [highlightedCodeBlocks, setHighlightedCodeBlocks] = useState<HighlightedCodeBlock[]>([])
 
   const validateField = (
     name: keyof LogFormData,
@@ -106,6 +108,7 @@ export default function InputForm() {
       setOutput(result.output)
       setWarnings(result.warnings || [])
       setEvidenceMissing(result.evidenceMissing || false)
+      setHighlightedCodeBlocks(result.highlightedCodeBlocks || [])
     } catch (error) {
       console.error('Error submitting form:', error)
       alert(
@@ -368,6 +371,7 @@ export default function InputForm() {
         outputLanguage={formData.outputLanguage}
         warnings={warnings}
         evidenceMissing={evidenceMissing}
+        highlightedCodeBlocks={highlightedCodeBlocks}
         onCopy={handleCopy}
         onCopyAll={handleCopyAll}
         onEdit={handleEdit}
