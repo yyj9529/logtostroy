@@ -25,4 +25,33 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #5a6578;
   }
+
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+}
+
+/* Shiki Code Block Styles */
+.shiki-wrapper {
+  @apply w-full;
+}
+
+.shiki-wrapper pre {
+  @apply m-0 p-4 text-sm font-mono overflow-x-auto;
+  line-height: 1.5;
+}
+
+.shiki-wrapper code {
+  @apply font-mono;
 }

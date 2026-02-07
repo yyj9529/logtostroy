@@ -14,9 +14,16 @@ export interface CodeBlock {
   truncated: boolean
 }
 
+export interface HighlightedCodeBlock {
+  language: string
+  html: string
+  truncated: boolean
+}
+
 export interface GeneratedContent {
   text: string
   codeBlocks: CodeBlock[]
+  highlightedCodeBlocks?: HighlightedCodeBlock[]
   ko?: string
   en?: string
 }

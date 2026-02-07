@@ -1,3 +1,5 @@
+import { HighlightedCodeBlock } from './api'
+
 export type Platform = 'linkedin' | 'x'
 export type Language = 'ko' | 'en'
 
@@ -24,6 +26,7 @@ export interface OutputDisplayProps {
   outputLanguage: 'ko' | 'en' | 'both'
   warnings?: string[]
   evidenceMissing?: boolean
+  highlightedCodeBlocks?: HighlightedCodeBlock[]
   onCopy: (text: string, platform: Platform, language?: Language) => void
   onCopyAll: () => void
   onEdit: (platform: Platform, language: Language, text: string) => void
